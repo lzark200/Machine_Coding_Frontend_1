@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Oops — Something Went Wrong</title>
+<style>
+  :root{
+    --bg: #0b1020;
+    --fg: #e9ecf1;
+    --muted: #aab3c5;
+    --card: hsla(0,0%,100%,0.06);
+    --accent1: #8ab4ff;
+    --accent2: #b388ff;
+    --accent3: #6ee7ff;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 22px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg: #f6f7fb;
+      --fg: #0c1222;
+      --muted: #5c6578;
+      --card: rgba(255,255,255,.7);
+      --shadow: 0 10px 30px rgba(30, 55, 90, .18);
+    }
+  }
+
+  /* Page layout */
+  html,body{height:100%}
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 800px at 20% 10%, #1a2142 0%, transparent 60%),
+                radial-gradient(1000px 700px at 80% 90%, #0f1533 0%, transparent 60%),
+                var(--bg);
+    color: var(--fg);
+    display:grid; place-items:center; overflow:hidden;
+  }
+
+  /* Floating gradient blobs */
+  .blob, .blob2, .blob3{
+    position: fixed; filter: blur(60px); opacity:.45; z-index:0; pointer-events:none;
+    mix-blend-mode: screen;
+  }
+  .blob{ width:48vmax; height:48vmax; background: radial-gradient(circle at 30% 30%, var(--accent1), transparent 60%), radial-gradient(circle at 70% 60%, var(--accent2), transparent 60%); top:-10vmax; left:-10vmax; animation: float1 18s ease-in-out infinite alternate;}
+  .blob2{width:42vmax; height:42vmax; background: radial-gradient(circle at 60% 40%, var(--accent3), transparent 60%), radial-gradient(circle at 30% 70%, var(--accent2), transparent 60%); bottom:-12vmax; right:-8vmax; animation: float2 22s ease-in-out infinite alternate;}
+  .blob3{width:30vmax; height:30vmax; background: radial-gradient(circle at 50% 50%, #fff, transparent 60%); top:10vmax; right:50%; opacity:.08; animation: float3 26s ease-in-out infinite alternate;}
+
+  @keyframes float1{to{transform: translate3d(3vmax,2vmax,0) rotate(8deg) scale(1.05)}}
+  @keyframes float2{to{transform: translate3d(-3vmax,-1vmax,0) rotate(-6deg) scale(1.08)}}
+  @keyframes float3{to{transform: translate3d(1vmax,-2vmax,0) scale(1.1)}}
+
+  /* Card */
+  .card{
+    position:relative; z-index:1; width:min(920px, 92vw); padding:28px;
+    background: var(--card); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-radius: var(--radius); box-shadow: var(--shadow); border:1px solid rgba(255,255,255,.12);
+  }
+  .inner{
+    display:grid; grid-template-columns: 1.1fr .9fr; gap:30px;
+  }
+  @media (max-width: 840px){ .inner{ grid-template-columns: 1fr; } }
+
+  /* Heading */
+  .code{
+    font-size: clamp(60px, 10vw, 132px);
+    line-height:.9; margin:0;
+    background: linear-gradient(135deg, var(--accent1), var(--accent3), var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color: transparent;
+    letter-spacing: -2px; font-weight: 800;
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.25));
+  }
+  .glitch {
+    position: relative; display: inline-block;
+  }
+  .glitch::before, .glitch::after{
+    content: attr(data-text); position:absolute; left:0; top:0; width:100%; overflow:hidden;
+    color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.25);
+  }
+  .glitch::before{ transform: translate(2px,0); clip-path: inset(0 0 55% 0); filter: drop-shadow(0 0 0 var(--accent1)); animation: s1 2.5s infinite linear alternate-reverse; }
+  .glitch::after{ transform: translate(-2px,0); clip-path: inset(45% 0 0 0); filter: drop-shadow(0 0 0 var(--accent2)); animation: s2 2.2s infinite linear alternate; }
+  @keyframes s1{50%{transform: translate(1px,0)} to{transform: translate(3px,0)}}
+  @keyframes s2{50%{transform: translate(-1px,0)} to{transform: translate(-3px,0)}}
+
+  .title{font-size: clamp(22px, 3vw, 30px); margin:.3rem 0 0.6rem; font-weight:700}
+  .desc{color: var(--muted); margin:0 0 1rem; font-size: clamp(14px, 2.1vw, 16px)}
+
+  /* Actions */
+  .actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:18px}
+  .btn{
+    appearance:none; border:none; padding:12px 16px; border-radius:14px; cursor:pointer;
+    font-weight: 700; letter-spacing:.2px; transition: transform .08s ease, background .2s ease, box-shadow .2s ease;
+    background: rgba(255,255,255,.12); color: var(--fg); box-shadow: 0 6px 16px rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.16);
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0); }
+  .btn.primary{ background: linear-gradient(135deg, var(--accent1), var(--accent2)); color:#0b0f1e; border:none }
+  .btn.ghost{ background: transparent; border:1px dashed rgba(255,255,255,.25) }
+
+  /* Meta panel */
+  .meta{
+    background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+    border-radius: 16px; padding:16px; font-size:14px; color: var(--muted);
+  }
+  .kvs{ display:grid; grid-template-columns: 1fr; gap:10px; }
+  .kv{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:12px; background: rgba(0,0,0,.12) }
+  .kv code{ user-select: all; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; color: var(--fg) }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius: 999px;
+    background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); color: var(--fg); font-size:12px; font-weight:700; letter-spacing:.3px;
+  }
+
+  /* Tiny footer */
+  .foot{ margin-top:14px; font-size:12px; color: var(--muted); display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding:.1rem .4rem; border-radius:6px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); color: var(--fg) }
+
+  /* SVG illustration */
+  .art{ width:100%; height:auto; aspect-ratio: 4/3; }
+  .stroke{ stroke: rgba(255,255,255,.45); }
+  .spark{ stroke: url(#grad); stroke-linecap: round; stroke-width: 6; filter: drop-shadow(0 0 18px rgba(138,180,255,.55)); animation: dash 3.5s ease-in-out infinite; }
+  @keyframes dash{ 0%{ stroke-dasharray: 0 400 } 50%{stroke-dasharray: 200 200 } 100%{ stroke-dasharray: 0 400 } }
+
+</style>
+</head>
+<body>
+  <div class="blob"></div>
+  <div class="blob2"></div>
+  <div class="blob3"></div>
+
+  <main class="card">
+    <div class="inner">
+      <!-- Left: Copy + CTA -->
+      <section>
+        <h1 class="code glitch" data-text="404">404</h1>
+        <h2 class="title">Oops — something went wrong.</h2>
+        <p class="desc">
+          The page you’re looking for doesn’t exist, is temporarily unavailable,
+          or decided to take a coffee break. Please check the URL, go back, or head home.
+        </p>
+
+        <div class="actions">
+          <button class="btn primary" id="goHome">Go Home</button>
+          <button class="btn" id="goBack">Go Back</button>
+          <button class="btn ghost" id="copy">Copy Error Details</button>
+          <a class="btn" id="report" href="#" rel="noreferrer">Report Issue</a>
+        </div>
+
+        <div class="foot">
+          <span class="badge" id="statusBadge">STATUS • 404</span>
+          <span>Shortcuts: <span class="kbd">H</span> Home • <span class="kbd">B</span> Back • <span class="kbd">C</span> Copy</span>
+        </div>
+      </section>
+
+      <!-- Right: Illustration + Meta -->
+      <section>
+        <svg class="art" viewBox="0 0 600 450" role="img" aria-label="Broken connection illustration">
+          <defs>
+            <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#8ab4ff"/>
+              <stop offset="100%" stop-color="#b388ff"/>
+            </linearGradient>
+          </defs>
+          <!-- Server racks -->
+          <g fill="none" stroke-width="3" class="stroke">
+            <rect x="60" y="70" width="160" height="280" rx="16"></rect>
+            <rect x="380" y="90" width="160" height="260" rx="16"></rect>
+            <!-- Slots -->
+            <g opacity=".75">
+              <line x1="80" x2="200" y1="110" y2="110"></line>
+              <line x1="80" x2="200" y1="140" y2="140"></line>
+              <line x1="80" x2="200" y1="170" y2="170"></line>
+              <line x1="80" x2="200" y1="200" y2="200"></line>
+              <line x1="80" x2="200" y1="230" y2="230"></line>
+              <line x1="80" x2="200" y1="260" y2="260"></line>
+              <line x1="80" x2="200" y1="290" y2="290"></line>
+            </g>
+            <g opacity=".75">
+              <line x1="400" x2="520" y1="130" y2="130"></line>
+              <line x1="400" x2="520" y1="160" y2="160"></line>
+              <line x1="400" x2="520" y1="190" y2="190"></line>
+              <line x1="400" x2="520" y1="220" y2="220"></line>
+              <line x1="400" x2="520" y1="250" y2="250"></line>
+              <line x1="400" x2="520" y1="280" y2="280"></line>
+            </g>
+          </g>
+          <!-- Broken cable spark -->
+          <path class="spark" d="M220,240 C260,260 310,270 350,260"></path>
+          <circle cx="220" cy="240" r="8" fill="#8ab4ff"/>
+          <circle cx="350" cy="260" r="8" fill="#b388ff"/>
+        </svg>
+
+        <div class="meta">
+          <div class="kvs">
+            <div class="kv"><strong>Error ID</strong><code id="rid">—</code></div>
+            <div class="kv"><strong>Timestamp</strong><code id="ts">—</code></div>
+            <div class="kv"><strong>Path</strong><code id="pth">—</code></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+  // Helpers
+  const $ = (s) => document.querySelector(s);
+  const pad = (n)=> String(n).padStart(2,"0");
+
+  // Generate a short error ID (client-side pseudo id; replace with server ID if you have one)
+  function makeId(){
+    const s = crypto.getRandomValues(new Uint8Array(8));
+    return [...s].map(b => b.toString(16).padStart(2,'0')).join('').slice(0,12);
+  }
+
+  // Fill meta
+  const now = new Date();
+  $('#rid').textContent = makeId();
+  $('#ts').textContent = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${Intl.DateTimeFormat().resolvedOptions().timeZone || ''}`;
+  $('#pth').textContent = location.pathname || '/';
+
+  // Buttons
+  $('#goHome').addEventListener('click', () => {
+    // Try a custom home, fallback to origin
+    const home = document.querySelector('meta[name="home"]')?.content || '/';
+    location.href = home.startsWith('http') ? home : (location.origin + home);
+  });
+  $('#goBack').addEventListener('click', () => {
+    if (history.length > 1) history.back(); else location.href = '/';
+  });
+
+  // Copy error details
+  $('#copy').addEventListener('click', async () => {
+    const details = [
+      `Status: 404`,
+      `Error ID: ${$('#rid').textContent}`,
+      `Timestamp: ${$('#ts').textContent}`,
+      `Path: ${$('#pth').textContent}`,
+      `User Agent: ${navigator.userAgent}`
+    ].join('\n');
+    try{
+      await navigator.clipboard.writeText(details);
+      toast('Copied error details to clipboard.');
+    }catch(e){
+      toast('Copy failed. Select text manually.');
+    }
+  });
+
+  // Report (opens mailto with details)
+  const report = document.getElementById('report');
+  report.addEventListener('click', (e) => {
+    e.preventDefault();
+    const subject = encodeURIComponent('Error report: 404');
+    const body = encodeURIComponent([
+      'Please describe what you were doing when this happened:',
+      '',
+      '---',
+      `Status: 404`,
+      `Error ID: ${$('#rid').textContent}`,
+      `Timestamp: ${$('#ts').textContent}`,
+      `Path: ${$('#pth').textContent}`,
+      `User Agent: ${navigator.userAgent}`
+    ].join('\n'));
+    location.href = `mailto:support@example.com?subject=${subject}&body=${body}`;
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e)=>{
+    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.key.toLowerCase()==='h') $('#goHome').click();
+    if (e.key.toLowerCase()==='b') $('#goBack').click();
+    if (e.key.toLowerCase()==='c') $('#copy').click();
+  });
+
+  // Tiny toast
+  const toast = (msg) => {
+    let t = document.getElementById('toast');
+    if (!t){
+      t = document.createElement('div');
+      t.id='toast';
+      t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(20,24,40,.9);color:#fff;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);box-shadow:0 10px 22px rgba(0,0,0,.4);z-index:5;opacity:0;transition:opacity .2s, transform .2s;pointer-events:none;font:600 14px/1.2 ui-sans-serif, system-ui;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    t.style.transform = 'translateX(-50%) translateY(-4px)';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(()=>{
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+    }, 1800);
+  };
+</script>
+</body>
+</html>
